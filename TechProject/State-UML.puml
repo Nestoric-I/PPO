@@ -1,0 +1,20 @@
+@startuml stateDiagram
+
+state "Свободно" as OnSale
+state "Записан" as Reservation
+state "Оплачен" as Purchased
+state "Модерация" as Moderation
+state "Возврат" as Refund
+state "Закрыт" as Canceled
+
+[*] --> OnSale
+OnSale --> Reservation : Запись
+Reservation --> OnSale : Отмена записи
+Reservation --> Purchased : Покупка
+Purchased --> Moderation : Отмена курса
+Purchased --> Canceled : Курс закрыт
+Moderation --> Refund : Прошёл модерацию
+OnSale --> Canceled : Отмена курса
+Canceled --> [*]
+
+@enduml
