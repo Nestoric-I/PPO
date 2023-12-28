@@ -1,0 +1,75 @@
+@startuml C4-Infrastructure
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Dynamic.puml
+
+<style>
+component {
+  BackGroundColor #3874c7
+  LineThickness 1
+  LineColor #254d84
+}
+</style>
+
+package "Разработка" {
+    component Miro as "miro" 
+    component Avion as "avion" 
+    component GitHubProject as"GitHub project" 
+    component Developer as"Разработчик" 
+    component VS as"VS 2022" 
+    component Git as"Git" 
+    component GitHub as"GitHub"
+    component GitHubActions as"GitHub actions"
+    component DockerContainer as"Сборка и запуск контейнера в Docker"
+    component SonarQube as"SonarQube"
+    component xUnit as"xUnit"
+    component DockerImage  as"Сборка образа в Docker"
+    component Deploy as"Деплой скрипт"
+
+    Miro -down-> Avion : "event storming"
+    Avion -down-> GitHubProject : "story map"
+    GitHubProject -down-> Developer : "задачи"
+    Developer -down-> VS : "пишет код"
+    VS -down-> Git : "исходный код"
+    Git -down-> GitHub : "коммиты"
+    GitHub -down-> GitHubActions : "триггер"
+    GitHubActions -down-> DockerContainer : "Запуск пайплайна по триггеру "новый коммит""
+    GitHubActions -down-> DockerImage : "Запуск пайплайна по триггеру "создание релиза""
+    GitHubActions -down-> Deploy : "Запуск пайплайна по триггеру "создание релиза""
+    DockerContainer -down-> SonarQube : "Запуск анализатора кода"
+    SonarQube -down-> xUnit : "Запуск тестов"
+} 
+
+package "VK Cloud data center (MS1)" {
+    component DockerRegistry as "Docker Registry" 
+    component VMOSUbuntu as "VM OS Ubuntu c RabbitMQ 1шт." 
+    component VKCloudDBCluster as "VK Cloud databases cluster" 
+    component VKCloudS3 as "VK Cloud S3" 
+
+    package "Kubernetes cluster" {
+    label label as "Тип VM: STD2-2-4 
+    3 master node"
+    component WebApi as "WebApi" 
+
+    WebApi -down-> VMOSUbuntu : ""
+    WebApi -down-> VKCloudDBCluster : ""
+    WebApi -down-> VKCloudS3 : ""
+    }   
+    
+    package "Мониторинги" {
+    component VKCloudDashboard as "VK Cloud дашборд" 
+    component VKCloudAlerting as "VK Cloud алертинг уведомление по СМС" 
+    component VKCloudLog as "VK Cloud логирование" 
+
+    WebApi -down-> VKCloudLog : "Пишет логи"
+    VKCloudLog -up-> VMOSUbuntu : "Запрос состояния"
+    VKCloudLog -up-> VKCloudDBCluster : "Запрос состояния"
+    VKCloudLog -up-> VKCloudS3 : "Запрос состояния"
+
+    VKCloudDashboard -up-> VKCloudLog : "Получить логи"
+    VKCloudAlerting -up-> VKCloudLog : "Получить логи"
+    }  
+
+    DockerImage ---down-> DockerRegistry : "Публикация образа"
+    Deploy ---down-> DockerRegistry : ""
+    Deploy ---down-> WebApi : ""
+} 

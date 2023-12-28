@@ -1,0 +1,102 @@
+@startuml C4-Components
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Component
+
+Container(mobile_app, "Мобильное приложение", "Flutter", "")
+
+System_Boundary(message_processing_system, "Web API"){
+
+    Container(register_controller, "RegisterController", "c#, .net", "Регистрация в системе")
+
+    Container(reservation_controller, "ReservationController", "c#, .net", "Проверка возможности записи, запись, отмена записи")
+
+    Container(request_controller, "RequestController", "c#, .net", "Управление заявками на создание курса, регистрацию преподавателя, возврат средств")
+
+    Container(concert_controller, "ConcertController", "c#, .net", "Управление курсами (создание, редактирование, отмена)")
+
+    Container(search_controller, "SearchController", "c#, .net", "Поиск (фильтрация, сортировка) курсов. Поиск возможных размещений по курсу")
+
+    Container(content_controller, "ContentController", "c#, .net", "Выдача контента курсов (название, описание, фото и т.д. )")
+
+    Container(auth_controller, "AuthController", "c#, .net", "Регистрация, авторизация в системе")
+
+
+
+
+    Container(register_service, "RegisterService", "c#, .net", "")
+
+    Container(reservation_service, "ReservationService", "c#, .net", "")
+
+    Container(request_service, "RequestService", "c#, .net", "")
+
+    Container(concert_service, "ConcertService", "c#, .net", "")
+
+    Container(search_service, "SearchService", "c#, .net", "")
+
+    Container(content_service, "ContentService", "c#, .net", "")
+
+    Container(hall_service, "HallService", "c#, .net", "")
+    
+    Container(auth_service, "AuthService", "c#, .net", "")
+}
+
+ContainerDb(ReadDataBase, "База данных", "PostgreSQL", "")
+
+ContainerDb(SaveDataBase, "Объектное хранилище", "S3", "")
+
+SystemQueue(MessageBus, "Шина сообщений RabbitMQ", "Для обмена информацией между сервисами")
+
+System_Ext(ObrNadzor, "ОбрНадзор API [Программная система]", "Проверка аккредитации преподавателя")
+
+System_Ext(Email, "Cистема электронной почты [Программная система]", "Поставщик системы отправки электронной почты")
+
+System_Ext(PaymentSystem, "Электронная платежная система [Программная система]", "Интернет-эквайринг, прием платежей")
+
+mobile_app ---> register_controller : "[json, HTTPS] Запросы регистрации"
+
+mobile_app ---> reservation_controller : "[json, HTTPS] Запросы верификации и бронирования"
+
+mobile_app ---> request_controller : "[json, HTTPS] Получить заявки, дать ответ на заявку"
+
+mobile_app ---> concert_controller : "[json, HTTPS] Запросы создания, редактирования"
+
+mobile_app ---> search_controller :"[json, HTTPS] Поисковые запросы"
+
+mobile_app ---> content_controller : "[json, HTTPS] Запросы на получение и создание контента для курсов"
+
+mobile_app ---> auth_controller : "[json, HTTPS] Запросы на аутентификацию"
+
+register_controller ----> register_service
+reservation_controller ----> reservation_service
+request_controller ----> request_service
+concert_controller ----> concert_service
+search_controller ----> search_service
+content_controller ----> content_service
+auth_controller ----> auth_service
+
+register_service -----> ReadDataBase
+reservation_service -----> ReadDataBase
+request_service -----> ReadDataBase
+concert_service -----> ReadDataBase
+search_service -----> ReadDataBase
+content_service -----> ReadDataBase
+auth_controller ----> ReadDataBase
+auth_service ----> ReadDataBase
+
+reservation_service -----> MessageBus
+request_service -----> MessageBus
+concert_service -----> MessageBus
+search_service -----> MessageBus
+auth_service -----> MessageBus
+
+content_controller ------> SaveDataBase
+
+
+register_service --> ObrNadzor : "Проверка преподавателя"
+register_service --> Email : "Отправка подтверждения регистрации"
+reservation_service --> Email : "Отправка информации"
+reservation_service --> PaymentSystem : "Оплата"
+
+@enduml
