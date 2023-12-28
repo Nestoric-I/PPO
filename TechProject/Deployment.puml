@@ -1,0 +1,38 @@
+@startuml
+  !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+
+title Deployment Diagram
+
+Deployment_Node(mob, "Мобильное устройство пользователя", "Deployment node: Apple IOS or Android"){
+    Container(mobile, "Мобильное приложение", "Container: Flutter", "Предоставляет функционал поиска и резервирования билетов на концерты")
+}
+
+Deployment_Node(VK, "VK Cloud", "data center(MS1)"){
+    Deployment_Node(Ubuntu1, "VK Cloud Containers", "Kubernetes cluster"){
+        Deployment_Node(WebServer, "", ""){
+            Container(WebApi, "Web API", "Container: .Net", "Предоставляет функционал системы поиска и резервирования билетов через JSON/HTTPS API")
+        }
+    }
+
+    Deployment_Node(Ubuntu2, "VK Cloud databases cluster", "PostgreSQL 14"){
+        ContainerDb(ReadDataBase, "База данных", "PostgreSQL", "Хранение пользовательских данных и информации о концертах")
+    }
+
+    Deployment_Node(Ubuntu3, "VK Cloud Storage", ""){
+        ContainerDb(SaveDataBase, "S3 Объектное хранилище", "Cloud Storage", "")
+    }
+
+    Deployment_Node(Ubuntu4, "VM (STD2-2-4): OS Ubuntu 18.1", ""){
+        SystemQueue(MessageBus, "Шина сообщений","RabbitMQ", "")
+    }
+}
+
+mobile ..> WebApi : "Запросы к API [JSON/HTTPS]"
+
+WebApi ..> ReadDataBase : "Запросы чтения и записи"
+
+WebApi ..> SaveDataBase : "Сохранение файлов" 
+
+WebApi ..> MessageBus : "Отправка сообщений в общую шину"
+
+@enduml
