@@ -1,0 +1,47 @@
+@startuml C4-Container
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Continer
+
+Person(Student, "Студент [Пользователь]", "Прохождение курсов, сдача тестов, получение сертификатов")
+
+Person(Administrator, "Администратор [Пользователь]", "Управление курсами, пользователями, доступами, статистикой по курсам")
+
+Person(Teacher, "Преподаватель [Пользователь]", "Создание и редактивирование курсов, мониторинг успеваемости, предоставление обратной связи")
+
+Person(TechSup, "Тех. поддержка [Пользователь]", "Сопровождение системы, устранение угроз, масштабирование системы")
+
+System_Boundary(search_and_reservation_system, "E-learning"){
+    Container(mobile_app, "Мобильное приложение", "Flutter", "")
+
+    Container(web_api, "Web API", "C#, .net", "Предоставляет функциональность системы через json/HTTPS API")
+
+    ContainerDb(ReadDataBase, "База данных", "PostgreSQL", "")
+
+    ContainerDb(SaveDataBase, "Объектное хранилище", "S3", "")
+
+    SystemQueue(MessageBus, "Шина сообщений RabbitMQ", "Для обмена информацией между сервисами")
+}
+
+System_Ext(ObrNadzor, "ОбрНадзор API [Программная система]", "Проверка аккредитации преподавателя")
+
+System_Ext(Email, "Cистема электронной почты [Программная система]", "Поставщик системы отправки электронной почты")
+
+System_Ext(PaymentSystem, "Электронная платежная система [Программная система]", "Интернет-эквайринг, прием платежей")
+
+Rel(Student, mobile_app, "Обучение")
+Rel(Administrator, mobile_app, "Модерация")
+Rel(Teacher, mobile_app, "Преподавание")
+Rel(TechSup, mobile_app, "Сопровождение")
+
+Rel(mobile_app, web_api, "[json, HTTPS] Запросы к API")
+web_api --> ReadDataBase : "Запись/чтение данных"
+web_api --> SaveDataBase : "Сохранение файлов"
+web_api --> MessageBus : "Отправка и получение сообщений"
+
+web_api --> ObrNadzor : "Проверка преподавателя"
+web_api -> Email : "Отправка писем"
+web_api --> PaymentSystem : "Оплата"
+
+@enduml
