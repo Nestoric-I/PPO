@@ -4,18 +4,18 @@
 title Deployment Diagram
 
 Deployment_Node(mob, "Мобильное устройство пользователя", "Deployment node: Apple IOS or Android"){
-    Container(mobile, "Мобильное приложение", "Container: Flutter", "Предоставляет функционал поиска и резервирования билетов на концерты")
+    Container(mobile, "Мобильное приложение", "Container: Flutter", "Предоставляет функционал СДО")
 }
 
 Deployment_Node(VK, "VK Cloud", "data center(MS1)"){
     Deployment_Node(Ubuntu1, "VK Cloud Containers", "Kubernetes cluster"){
         Deployment_Node(WebServer, "", ""){
-            Container(WebApi, "Web API", "Container: .Net", "Предоставляет функционал системы поиска и резервирования билетов через JSON/HTTPS API")
+            Container(WebApi, "Web API", "Container: .Net", "Предоставляет функционал СДО через JSON/HTTPS API")
         }
     }
 
     Deployment_Node(Ubuntu2, "VK Cloud databases cluster", "PostgreSQL 14"){
-        ContainerDb(ReadDataBase, "База данных", "PostgreSQL", "Хранение пользовательских данных и информации о концертах")
+        ContainerDb(ReadDataBase, "База данных", "PostgreSQL", "Хранение пользовательских данных и информации о курсах")
     }
 
     Deployment_Node(Ubuntu3, "VK Cloud Storage", ""){
